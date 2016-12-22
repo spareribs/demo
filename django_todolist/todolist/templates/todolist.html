@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+{% load poll_filter %}
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/todolist.js' %}"></script>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>ToDoList</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link href="{% static 'css/jquerysctipttop.css' %}" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div class="container" id="main">
+    <h1>ToDoList</h1>
+    <form role="form" id="main_input_box" method="post" action="{% url 'add_todolist' %}">
+        <label>
+            {% csrf_token %}
+            <input type="text" class="form-control" id="custom_textbox" name="body" placeholder="还有什么事情需要做?">
+            <input type="submit" value="Add" class="btn btn-primary add_button">
+        </label>
+    </form>
+    <ol class="list-group list_of_items">
+
+        {% for todolist_list in todolist_lists %}
+        <li class="list-group-item {% if todolist_list.tag_type %}completed_item{% endif%}">
+            <div class="text_holder">
+                {{ todolist_list.body }} --- {{ todolist_list.add_date | time_before }}
+                <div class="btn-group pull-right">
+                    <button class="delete btn btn-warning" data-id="{{ todolist_list.id }}">Delete</button>
+                    <button class="edit btn btn-success" data-id="{{ todolist_list.id }}">Edit</button>
+                </div>
+            </div>
+            <form action="{% url 'edit_todolist' %}" method="post" class="edit_input_box" data-id="{{ todolist_list.id }}" style="display:none">
+                {% csrf_token %}
+                <input type="text" name="rowid" value="{{ todolist_list.id }}" style="display:none"/>
+                <input type="text" size="50" class="itembox" name="body">
+                <input type="submit" value="submit" class="edit btn btn-success" >
+            </form>
+            <div class="checkbox" data-id="{{ todolist_list.id }}">
+                <label><input type="checkbox" class="pull-right"></label>
+            </div>
+        </li>
+        {% endfor %}
+        <div class="pull-right">
+            {# todolist_lists.paginator.page_range 这个函数返回包含一个所有页码数的 range 对象 #}
+            {# 即 range(1, todolist_lists.paginator.num_pages + 1) #}
+            {% for page_number in todolist_lists.paginator.page_range %}
+            {% ifequal page_number todolist_lists.number %}
+            {{ page_number }}
+            {% else %}
+            <a href="?page={{ page_number }}">{{ page_number }}</a>
+            {% endifequal %}
+            {% endfor %}
+        </div>
+    </ol>
+</div>
+</body>
+</html>
